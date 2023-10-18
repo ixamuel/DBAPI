@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <DBAPI.h>
-#include <Adafruit_ILI9341.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include <TimeLib.h>
+#include <TFT_eSPI.h> // Include the graphics library for the TTGO TFT Display
 
 const char* ssid = "SSID";
 const char* password = "password";
@@ -32,19 +32,17 @@ uint32_t nextTime;
 uint32_t nextScroll;
 time_t old_time;
 
-#define TFT_DC 16
-#define TFT_CS 15
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+TFT_eSPI tft = TFT_eSPI(); // Create an instance of the library
 
 void setup() {
 	Serial.begin(115200);
-	tft.begin();
+	tft.init();
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(ssid, password);
-	tft.fillScreen(BACKGROUND_COLOR);
-	tft.setTextColor(FOREGROUND_COLOR);
+	tft.fillScreen(TFT_BLACK); // Use TFT_BLACK as the background color
+	tft.setTextColor(TFT_WHITE); // Use TFT_WHITE as the foreground color
 	tft.setRotation(1);
-	tft.print("Verbinde...");
+	tft.println("Verbinde...");
  	Serial.print("Verbinde...");
 	while (WiFi.status() != WL_CONNECTED) {
 		tft.write('.');
@@ -59,24 +57,24 @@ void setup() {
 	timeClient.setTimeOffset(3600); // CET
 
 	// Draw static content
-	tft.fillScreen(BACKGROUND_COLOR);
-	tft.setTextColor(FOREGROUND_COLOR);
+	tft.fillScreen(TFT_BLACK); // Use TFT_BLACK as the background color
+	tft.setTextColor(TFT_WHITE); // Use TFT_WHITE as the foreground color
 	tft.setTextSize(2);
 	//tft.setCursor((tft.width() - (strlen(fromStationName) * 6 - 1) * 2) / 2, 2);
 	tft.setCursor(11 * 6 + 6, 2);
-	tft.print(fromStationName);
-	tft.fillRect(0, 18, tft.width(), 18, HIGHLIGHT_COLOR);
-	tft.setTextColor(BACKGROUND_COLOR);
+	tft.println(fromStationName);
+	tft.fillRect(0, 18, tft.width(), 18, TFT_RED); // Use TFT_RED as the highlight color
+	tft.setTextColor(TFT_BLACK); // Use TFT_BLACK as the text color on the highlighted area
 	tft.setCursor(2, 20);
-	tft.print("Zeit");
+	tft.println("Zeit");
 #ifdef WIDE_MODE
 	tft.setCursor(11 * 6 + 6, 20);
 #else
 	tft.setCursor(9 * 6 + 6, 20);
 #endif
-	tft.print("Nach");
+	tft.println("Nach");
 	tft.setCursor(tft.width() - 7 * 6 * 2, 20);
-	tft.print("Gleis");
+	tft.println("Gleis");
 }
 
 uint32_t scroll;
