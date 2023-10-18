@@ -57,14 +57,13 @@ void setup() {
 	timeClient.setTimeOffset(3600); // CET
 
 	// Draw static content
-	tft.fillScreen(TFT_BLACK); // Use TFT_BLACK as the background color
-	tft.setTextColor(TFT_WHITE); // Use TFT_WHITE as the foreground color
+	tft.fillScreen(TFT_BLACK);
+	tft.setTextColor(TFT_WHITE);
 	tft.setTextSize(2);
-	//tft.setCursor((tft.width() - (strlen(fromStationName) * 6 - 1) * 2) / 2, 2);
 	tft.setCursor(11 * 6 + 6, 2);
 	tft.println(fromStationName);
-	tft.fillRect(0, 18, tft.width(), 18, TFT_RED); // Use TFT_RED as the highlight color
-	tft.setTextColor(TFT_BLACK); // Use TFT_BLACK as the text color on the highlighted area
+	tft.fillRect(0, 18, tft.width(), 18, TFT_RED);
+	tft.setTextColor(TFT_BLACK);
 	tft.setCursor(2, 20);
 	tft.println("Zeit");
 #ifdef WIDE_MODE
