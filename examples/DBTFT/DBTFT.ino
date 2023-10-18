@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <DBAPI.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
