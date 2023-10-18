@@ -83,10 +83,10 @@ void loop() {
 		time_t tnow = timeClient.getEpochTime();
 		time_t tdst = dst(tnow);
 		if (old_time / 60 != tdst / 60) {
-			tft.setTextColor(TTGO_FOREGROUND_COLOR); // Change to TTGO color
+			tft.setTextColor(TFT_WHITE);
 			tft.setTextSize(2);
 			tft.setCursor(2, 2);
-			tft.fillRect(2, 2, 5 * 6 * 2 , 16, TTGO_BACKGROUND_COLOR); // Change to TTGO color
+			tft.fillRect(2, 2, 5 * 6 * 2 , 16, TFT_RED);
 			if (hour(tdst) < 10) tft.write('0');
 			tft.print(hour(tdst));
 			tft.write(':');
@@ -109,11 +109,11 @@ void loop() {
 			pos += 18;
 			if (pos + 16 > tft.height()) break;
 #ifdef WIDE_MODE
-			tft.fillRect(0, pos - 1, 11 * 6 + 4 , 17, TTGO_FOREGROUND_COLOR); // Change to TTGO color
+			tft.fillRect(0, pos - 1, 11 * 6 + 4 , 17, (TFT_RED);
 #else
-			tft.fillRect(0, pos - 1, 9 * 6 + 4 , 17, TTGO_FOREGROUND_COLOR); // Change to TTGO color
+			tft.fillRect(0, pos - 1, 9 * 6 + 4 , 17, TFT_WHITE);
 #endif
-			tft.setTextColor(TTGO_BACKGROUND_COLOR); // Change to TTGO color
+			tft.setTextColor(TFT_BLACK);
 			tft.setTextSize(1);
 			tft.setCursor(2, pos);
 			tft.print(depature->time);
@@ -129,48 +129,28 @@ void loop() {
 				tft.write(' ');
 				tft.print(depature->textline);
 			}
-			tft.setTextColor(TTGO_FOREGROUND_COLOR); // Change to TTGO color
-#ifdef WIDE_MODE
-			tft.fillRect(11 * 6 + 4, pos - 1, tft.width(), 17, TTGO_BACKGROUND_COLOR); // Change to TTGO color
-#else
-			tft.fillRect(9 * 6 + 4, pos - 1, tft.width(), 17, TTGO_BACKGROUND_COLOR); // Change to TTGO color
-	    }
-#endif
-	}
-}
+			
+#ifndef WIDE_MODE
+            // Display the target station and platform number without scrolling
+            tft.setTextColor(TFT_WHTIE);
+            tft.setCursor(9 * 6 + 6, pos);
+            tft.setTextSize(1);
+            tft.print(depature->target);
 
-void printScroll(String text, uint16_t x, uint16_t y, bool force, bool cancelled) {
-	tft.setTextColor(FOREGROUND_COLOR);
-	tft.setTextSize(2);
-	if (text.length() > SCROLL_CHARS || force) {
-		uint32_t p = scroll;
-		int16_t ts = text.length() - SCROLL_CHARS;
-		if (ts < 0) {
-			ts = 0;
-		}
-		uint32_t to_scroll = ts;
-		p %= to_scroll * 2 + SCROLL_STALL * 2;
-		if (p <= to_scroll) {
-			if (!force && p == 0) return; // do not update 0 position
-		} else if (p <= to_scroll + SCROLL_STALL) {
-			p = to_scroll;
-			if (!force) return; // do not update on stall, if no update is forced
-		} else if (p <= to_scroll * 2 + SCROLL_STALL) {
-			p = SCROLL_STALL + to_scroll * 2 - p;
-		} else {
-			p = 0;
-			if (!force) return; // do not update on stall, if no update is forced
-		}
-		tft.fillRect(x - 2, y - 1, SCROLL_CHARS * 6 * 2, 17, BACKGROUND_COLOR);
-		tft.setCursor(x, y);
-		text = text.substring(p, p + SCROLL_CHARS);
-		tft.print(text);
-		if (cancelled) {
-			uint8_t len = min((uint8_t) text.length(), (uint8_t) SCROLL_CHARS);
-			tft.drawFastHLine(x, y + 6, (len * 6 - 1) * 2, FOREGROUND_COLOR);
-			tft.drawFastHLine(x, y + 7, (len * 6 - 1) * 2, FOREGROUND_COLOR);
-		}
-	}
+            tft.setTextColor(TFT_RED);
+            tft.setCursor(tft.width() - 7 * 6 * 2, pos);
+            if (strcmp("", depature->newPlatform) != 0) {
+                tft.setTextColor(HIGHLIGHT_COLOR);
+                tft.print(depature->newPlatform);
+            } else {
+                tft.print(depature->platform);
+            }
+#endif
+
+            depature = depature->next;
+        }
+        nextCheck = millis() + 50000;
+    }
 }
 
 time_t dst(time_t t) {
