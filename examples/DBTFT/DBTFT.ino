@@ -34,47 +34,101 @@ time_t old_time;
 
 TFT_eSPI tft = TFT_eSPI(); // Create an instance of the library
 
-void setup() {
-	Serial.begin(115200);
-	tft.init();
-	WiFi.mode(WIFI_STA);
-	WiFi.begin(ssid, password);
-	tft.fillScreen(TFT_BLACK); // Use TFT_BLACK as the background color
-	tft.setTextColor(TFT_WHITE); // Use TFT_WHITE as the foreground color
-	tft.setRotation(1);
-	tft.println("Verbinde...");
- 	Serial.print("Verbinde...");
-	while (WiFi.status() != WL_CONNECTED) {
-		tft.write('.');
-    	Serial.write('.');
-		delay(500);
-	}
-	db.setAGFXOutput(true);
-	Serial.println();
-	fromStation = db.getStation(fromStationName);
-	yield();
-	timeClient.begin();
-	timeClient.setTimeOffset(3600); // CET
+void loop() {
+    // Update time client if it's time
+    if (nextTime < millis()) {
+        updateTimeClient();
+        updateDisplayTime();
+        nextTime = millis() + 1000;
+    }
 
-	// Draw static content
-	tft.fillScreen(TFT_BLACK);
-	tft.setTextColor(TFT_WHITE);
-	tft.setTextSize(2);
-	tft.setCursor(11 * 6 + 6, 2);
-	tft.println(fromStationName);
-	tft.fillRect(0, 18, tft.width(), 18, TFT_RED);
-	tft.setTextColor(TFT_BLACK);
-	tft.setCursor(2, 20);
-	tft.println("Zeit");
+    // Check WiFi status and reload departures if it's time
+    if (nextCheck < millis()) {
+        checkWiFiStatus();
+        reloadDepartures();
+        nextCheck = millis() + 50000;
+    }
+
 #ifdef WIDE_MODE
-	tft.setCursor(11 * 6 + 6, 20);
-#else
-	tft.setCursor(9 * 6 + 6, 20);
+    // Scroll the display if it's time
+    if (nextScroll < millis()) {
+        scrollDisplay();
+        nextScroll = millis() + SCROLL_INTERVAL;
+    }
 #endif
-	tft.println("Nach");
-	tft.setCursor(tft.width() - 7 * 6 * 2, 20);
-	tft.println("Gleis");
 }
+
+void updateTimeClient() {
+    timeClient.update();
+}
+
+void updateDisplayTime() {
+    time_t currentTime = timeClient.getEpochTime();
+    time_t dstTime = dst(currentTime);
+
+    if (old_time / 60 != dstTime / 60) {
+        displayTime(dstTime);
+        old_time = dstTime;
+    }
+}
+
+void checkWiFiStatus() {
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("Disconnected");
+    }
+}
+
+void reloadDepartures() {
+    Serial.println("Reload");
+    da = db.getDepatures(fromStation->stationId, NULL, NULL, NULL, 11, PROD_RE | PROD_S);
+    Serial.println();
+
+    depature = da;
+    uint16_t pos = 21;
+
+    while (depature != NULL) {
+        pos += 18;
+        if (pos + 16 > tft.height()) break;
+
+        displayDeparture(pos);
+        depature = depature->next;
+    }
+}
+
+void displayDeparture(uint16_t pos) {
+#ifdef WIDE_MODE
+    displayWideModeDeparture(pos);
+#else
+    displayNormalModeDeparture(pos);
+#endif
+
+#ifndef WIDE_MODE
+    displayDelayInfo(pos);
+#endif
+
+    displayPlatformInfo(pos);
+}
+
+void displayWideModeDeparture(uint16_t pos) {
+// ...
+}
+
+void displayNormalModeDeparture(uint16_t pos) {
+// ...
+}
+
+void displayDelayInfo(uint16_t pos) {
+// ...
+}
+
+void displayPlatformInfo(uint16_t pos) {
+// ...
+}
+
+void scrollDisplay() {
+// ...
+}
+
 
 uint32_t scroll;
 void loop() {
