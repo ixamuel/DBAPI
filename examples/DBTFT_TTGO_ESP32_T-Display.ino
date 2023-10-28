@@ -3,8 +3,8 @@
 #include <TinyXML.h>
 #include <TFT_eSPI.h> // Include the graphics library
 
-const char* ssid = "DD";
-const char* password = "Smartlock19";
+const char* ssid = "SSID";
+const char* password = "password";
 const char* DB_Client_Id = "5edc7e052decd1a1d863575651d33382";
 const char* DB_Api_Key = "fccfbd3abe12d4d38f5a53b5a48b1f82";
 
