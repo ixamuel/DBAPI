@@ -7,8 +7,8 @@
 #include <NTPClient.h>
 #include <TimeLib.h>
 
-const char* ssid = "DD";
-const char* password = "Smartlock19";
+const char* ssid = "ssid";
+const char* password = "pw";
 const char* fromStationName = "Broetzingen Mitte";
 
 WiFiUDP ntpUDP;
